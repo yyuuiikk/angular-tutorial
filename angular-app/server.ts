@@ -30,9 +30,53 @@ export function app(): express.Express {
   }));
 
   // All regular routes use the Universal engine
-  server.get('*', (req, res) => {
-    res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] });
+  // server.get('*', (req, res) => {
+  //   res.render(indexHtml, { req, providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }] });
+  // });
+
+  const cacheManager = require('cache-manager');
+
+  const memoryCache = cacheManager.caching({
+    store: 'memory',
+    max: 50
   });
+
+// Serving server rendered routes
+  server.get('*',
+    (req, res, next) => {
+      // try to get the requested url from cache
+      memoryCache.get(req.originalUrl).then((cachedHtml: any) => {
+        if (cachedHtml) {
+          // Cached page exists. Send it.
+          res.send(cachedHtml);
+        } else {
+          // Cached page does not exist.
+          // Render a response using the Angular express engine
+          next();
+        }
+      }).catch((error: any) => {
+        // if we have an error render using angular univesal
+        next();
+      });
+    },
+    (req, res) => {
+      res.render(
+        indexHtml, {req, providers:
+            [{provide: APP_BASE_HREF, useValue: req.baseUrl}]},
+        (err: Error, html: string) => {
+          // Cache the rendered `html` for this request url to
+          // use for subsequent requests
+          // Cache the rendered page and set the cache to be
+          // eviced after 300s (5 minutes)
+          memoryCache.set(req.originalUrl, html, 300)
+            .catch((err: any) => console.log('Could not cache the request', err));
+
+          res.send(html);
+        }
+      );
+    }
+  );
+
 
   return server;
 }

@@ -25,6 +25,7 @@
     "@angular/router": "~13.3.0",
     "@nguniversal/express-engine": "^13.1.1",
     "angular-in-memory-web-api": "^0.13.0",
+    "cache-manager": "^2.11.1",
     "express": "^4.15.2",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
