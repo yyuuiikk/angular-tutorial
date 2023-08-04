@@ -1,5 +1,5 @@
 FROM node
 WORKDIR /projects
-RUN npm install -g @angular/cli@13.3
+RUN npm install -g @angular/cli
 EXPOSE 4200
 
