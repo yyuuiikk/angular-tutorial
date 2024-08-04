@@ -1,4 +1,4 @@
-FROM node
+FROM node:18
 WORKDIR /projects
 
 RUN apt update -y
